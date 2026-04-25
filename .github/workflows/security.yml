@@ -1,0 +1,31 @@
+name: SSDLC Scan
+
+on: [push]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        run: |
+          pip install semgrep
+          semgrep scan --config auto --json --output results.json
+      - name: Send results to ASPM
+        env:
+          API_URL: ${{ secrets.ASPM_API_URL }}
+          API_KEY: ${{ secrets.ASPM_API_KEY }}
+        run: |
+          for i in 1 2 3; do
+            status=$(curl -X POST "$API_URL/api/ingest/" \
+              -H "Authorization: Bearer $API_KEY" \
+              -H "Content-Type: application/json" \
+              -d @results.json \
+              -o /dev/null -w '%{http_code}' -s)
+            if [ "$status" -eq 202 ] || [ "$status" -eq 200 ]; then
+              echo "Successfully ingested"
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
