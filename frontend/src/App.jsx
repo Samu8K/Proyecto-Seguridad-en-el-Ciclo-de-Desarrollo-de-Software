@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useWebSocket } from './hooks/useWebSocket';
 import FindingsTable from './components/FindingsTable';
 import MetricsChart from './components/MetricsChart';
 import axios from 'axios';
@@ -8,10 +7,8 @@ import toast, { Toaster } from 'react-hot-toast';
 function App() {
   const [findings, setFindings] = useState([]);
   const [metrics, setMetrics] = useState({ total: 0, open: 0, in_progress: 0, resolved: 0, by_severity: {} });
-  const { lastMessage } = useWebSocket('ws://localhost:8000/ws');
 
   useEffect(() => {
-    // Fetch initial data
     const fetchData = async () => {
       try {
         const [metricsRes, findingsRes] = await Promise.all([
@@ -27,14 +24,17 @@ function App() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (lastMessage && lastMessage.type === 'NEW_FINDING') {
-      setFindings(prev => [lastMessage.data, ...prev]);
-      toast.success('New vulnerability detected');
-      // Optionally refresh metrics
-      axios.get('/api/metrics/dashboard').then(res => setMetrics(res.data));
+  const handleStatusChange = async (findingId, status) => {
+    try {
+      const res = await axios.patch(`/api/metrics/findings/${findingId}/status`, { status });
+      setFindings(prev => prev.map(item => item.id === findingId ? res.data : item));
+      const metricsRes = await axios.get('/api/metrics/dashboard');
+      setMetrics(metricsRes.data);
+      toast.success('Status actualizado');
+    } catch (err) {
+      toast.error('No se pudo actualizar el estado');
     }
-  }, [lastMessage]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -78,7 +78,7 @@ function App() {
           <div className="lg:col-span-2">
             <div className="bg-white p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-2">Latest Findings</h3>
-              <FindingsTable findings={findings} />
+              <FindingsTable findings={findings} onStatusChange={handleStatusChange} />
             </div>
           </div>
         </div>

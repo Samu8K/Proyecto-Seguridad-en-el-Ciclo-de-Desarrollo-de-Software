@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends
+from datetime import datetime
+from uuid import UUID
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.deps import get_db, get_current_user
-from app.models.finding import Finding, FindingStatus
-from app.models.user import User
+
+from app.db.session import get_db
+from app.models.finding import Finding, FindingHistory, FindingStatus
+from app.schemas.finding import FindingResponse, FindingStatusUpdate
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
 
 @router.get("/dashboard")
-async def dashboard_metrics(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def dashboard_metrics(db: AsyncSession = Depends(get_db)):
     total_query = select(func.count()).select_from(Finding)
     total = await db.scalar(total_query)
 
@@ -34,13 +39,12 @@ async def dashboard_metrics(db: AsyncSession = Depends(get_db), current_user: Us
         "by_severity": by_severity
     }
 
-@router.get("/findings")
+@router.get("/findings", response_model=List[FindingResponse])
 async def list_findings(
     skip: int = 0,
     limit: int = 50,
     status: FindingStatus = None,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db)
 ):
     query = select(Finding)
     if status:
@@ -49,3 +53,31 @@ async def list_findings(
     result = await db.execute(query)
     findings = result.scalars().all()
     return findings
+
+@router.patch("/findings/{finding_id}/status", response_model=FindingResponse)
+async def update_finding_status(
+    finding_id: UUID,
+    payload: FindingStatusUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(Finding).where(Finding.id == finding_id))
+    finding = result.scalar_one_or_none()
+    if not finding:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Finding not found")
+
+    old_status = finding.status
+    finding.status = payload.status
+    finding.updated_at = datetime.utcnow()
+
+    history = FindingHistory(
+        finding_id=finding.id,
+        action="status_update",
+        old_value={"status": old_status.value},
+        new_value={"status": payload.status.value},
+        changed_by="system"
+    )
+    db.add(history)
+
+    await db.commit()
+    await db.refresh(finding)
+    return finding

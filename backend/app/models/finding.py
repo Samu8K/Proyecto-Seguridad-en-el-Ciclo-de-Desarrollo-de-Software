@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import String, Integer, DateTime, Enum, ForeignKey, JSON, Float
+from datetime import datetime
+from sqlalchemy import String, Integer, DateTime, Enum, ForeignKey, JSON, Float, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 import enum
@@ -18,18 +18,65 @@ class Finding(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[str] = mapped_column(String(50), index=True)
     project_id: Mapped[str] = mapped_column(String(100), index=True)
+    scan_id: Mapped[str | None] = mapped_column(String(100), index=True)
+
+    # Información básica
     title: Mapped[str] = mapped_column(String(500))
+    description: Mapped[str | None] = mapped_column(Text)
     severity: Mapped[str] = mapped_column(String(20))
+
+    # Clasificación
     cwe_id: Mapped[str | None] = mapped_column(String(20))
-    cvss_score: Mapped[float | None] = mapped_column(Float)
+    owasp_top_10: Mapped[str | None] = mapped_column(String(50))
+    category: Mapped[str | None] = mapped_column(String(100))
+
+    # Ubicación
     file_path: Mapped[str] = mapped_column(String(500))
     line_number: Mapped[int]
+    code_snippet: Mapped[str | None] = mapped_column(Text)
+    function_name: Mapped[str | None] = mapped_column(String(200))
+    class_name: Mapped[str | None] = mapped_column(String(200))
+
+    # Priorización
+    cvss_vector: Mapped[str | None] = mapped_column(String(200))
+    cvss_base_score: Mapped[float | None] = mapped_column(Float)
+    cvss_temporal_score: Mapped[float | None] = mapped_column(Float)
+    cvss_environmental_score: Mapped[float | None] = mapped_column(Float)
+    confidence: Mapped[float | None] = mapped_column(Float)
+    impact: Mapped[str | None] = mapped_column(String(20))
+    exploitability: Mapped[str | None] = mapped_column(String(20))
+    priority_score: Mapped[float | None] = mapped_column(Float)  # Score calculado
+
+    # Metadatos
+    tags: Mapped[list[str]] = mapped_column(JSON, default=list)
+    references: Mapped[list[str]] = mapped_column(JSON, default=list)
+    custom_fields: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    # Información de herramienta
+    tool_name: Mapped[str | None] = mapped_column(String(100))
+    tool_version: Mapped[str | None] = mapped_column(String(50))
+    tool_type: Mapped[str | None] = mapped_column(String(20))
+
+    # Contexto
+    commit_hash: Mapped[str | None] = mapped_column(String(100))
+    branch: Mapped[str | None] = mapped_column(String(100))
+    author: Mapped[str | None] = mapped_column(String(100))
+    repository_url: Mapped[str | None] = mapped_column(String(500))
+    scan_date: Mapped[datetime | None] = mapped_column(DateTime)
+
+    # Estado y tracking
     fingerprint: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     hash_version: Mapped[int] = mapped_column(default=1)
-    metadata: Mapped[dict] = mapped_column(JSON, default={})
     status: Mapped[FindingStatus] = mapped_column(Enum(FindingStatus), default=FindingStatus.OPEN)
-    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
-    updated_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    assigned_to: Mapped[str | None] = mapped_column(String(100))
+    due_date: Mapped[datetime | None] = mapped_column(DateTime)
+
+    # Auditoría
+    extra_data: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relaciones
     history: Mapped[list["FindingHistory"]] = relationship(back_populates="finding")
 
 class FindingHistory(Base):

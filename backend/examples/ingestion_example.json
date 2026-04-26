@@ -1,0 +1,98 @@
+{
+  "tenant_id": "default",
+  "project_id": "mi-proyecto",
+  "scan_id": "scan-2026-04-26-001",
+  "tool_info": {
+    "name": "semgrep",
+    "version": "1.50.0",
+    "type": "SAST"
+  },
+  "context": {
+    "commit_hash": "a1b2c3d4e5f6",
+    "branch": "main",
+    "author": "security-team@company.com",
+    "repository_url": "https://github.com/company/my-project",
+    "scan_date": "2026-04-26T10:30:00Z"
+  },
+  "findings": [
+    {
+      "title": "SQL Injection en formulario de login",
+      "description": "Parámetro de entrada no sanitizado permite inyección SQL",
+      "severity": "CRITICAL",
+      "cwe_id": "CWE-89",
+      "owasp_top_10": "A03:2021-Injection",
+      "category": "Injection",
+      "file_path": "src/auth/login.py",
+      "line_number": 42,
+      "code_snippet": "password = request.POST.get('password')\nquery = f\"SELECT * FROM users WHERE password = '{password}'\"",
+      "function_name": "authenticate_user",
+      "class_name": "AuthService",
+      "cvss": {
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "base_score": 9.8,
+        "temporal_score": 9.8,
+        "environmental_score": 9.8
+      },
+      "confidence": 0.95,
+      "impact": "HIGH",
+      "exploitability": "HIGH",
+      "tags": ["sql-injection", "authentication", "critical"],
+      "references": [
+        "https://owasp.org/www-community/attacks/SQL_Injection",
+        "https://cwe.mitre.org/data/definitions/89.html"
+      ],
+      "tool": {
+        "name": "semgrep",
+        "version": "1.50.0",
+        "type": "SAST"
+      }
+    },
+    {
+      "title": "XSS en comentarios de usuarios",
+      "description": "Contenido HTML no escapado permite Cross-Site Scripting",
+      "severity": "HIGH",
+      "cwe_id": "CWE-79",
+      "owasp_top_10": "A03:2021-Injection",
+      "category": "XSS",
+      "file_path": "src/components/CommentForm.jsx",
+      "line_number": 25,
+      "code_snippet": "<div dangerouslySetInnerHTML={{__html: comment}} />",
+      "function_name": "renderComment",
+      "class_name": "CommentComponent",
+      "cvss": {
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "base_score": 6.1
+      },
+      "confidence": 0.9,
+      "impact": "MEDIUM",
+      "exploitability": "MEDIUM",
+      "tags": ["xss", "frontend", "user-input"],
+      "references": ["https://owasp.org/www-community/attacks/xss/"]
+    },
+    {
+      "title": "Dependencia vulnerable en package.json",
+      "description": "Versión desactualizada de lodash con vulnerabilidades conocidas",
+      "severity": "MEDIUM",
+      "cwe_id": "CWE-1104",
+      "owasp_top_10": "A06:2021-Vulnerable Components",
+      "category": "SCA",
+      "file_path": "package.json",
+      "line_number": 15,
+      "code_snippet": "\"lodash\": \"^4.17.4\"",
+      "cvss": {
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+        "base_score": 6.5
+      },
+      "confidence": 1.0,
+      "impact": "MEDIUM",
+      "exploitability": "LOW",
+      "tags": ["dependency", "supply-chain", "lodash"],
+      "references": ["https://nvd.nist.gov/vuln/detail/CVE-2021-23337"],
+      "tool": {
+        "name": "owasp-dependency-check",
+        "version": "8.2.1",
+        "type": "SCA"
+      }
+    }
+  ]
+}
