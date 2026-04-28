@@ -17,18 +17,18 @@ async def dashboard_metrics(db: AsyncSession = Depends(get_db)):
     total_query = select(func.count()).select_from(Finding)
     total = await db.scalar(total_query)
 
-    open_query = select(func.count()).where(Finding.status == FindingStatus.OPEN)
+    open_query = select(func.count()).select_from(Finding).where(Finding.status == FindingStatus.OPEN)
     open_count = await db.scalar(open_query)
 
-    in_progress_query = select(func.count()).where(Finding.status == FindingStatus.IN_PROGRESS)
+    in_progress_query = select(func.count()).select_from(Finding).where(Finding.status == FindingStatus.IN_PROGRESS)
     in_progress = await db.scalar(in_progress_query)
 
-    resolved_query = select(func.count()).where(Finding.status == FindingStatus.RESOLVED)
+    resolved_query = select(func.count()).select_from(Finding).where(Finding.status == FindingStatus.RESOLVED)
     resolved = await db.scalar(resolved_query)
 
     by_severity = {}
     for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
-        cnt = await db.scalar(select(func.count()).where(Finding.severity == sev))
+        cnt = await db.scalar(select(func.count()).select_from(Finding).where(Finding.severity == sev))
         by_severity[sev] = cnt
 
     return {
