@@ -13,7 +13,8 @@
     "react-dom": "^18.2.0",
     "axios": "^1.6.2",
     "recharts": "^2.10.3",
-    "react-hot-toast": "^2.4.1"
+    "react-hot-toast": "^2.4.1",
+    "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

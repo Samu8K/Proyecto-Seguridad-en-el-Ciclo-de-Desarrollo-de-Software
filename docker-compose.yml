@@ -2,47 +2,51 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     environment:
-      POSTGRES_USER: aspm
-      POSTGRES_PASSWORD: aspm123
-      POSTGRES_DB: aspm
+      POSTGRES_USER: secure_dojo
+      POSTGRES_PASSWORD: secure_dojo_pass
+      POSTGRES_DB: secure_coding_dojo
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aspm"]
+      test: ["CMD-SHELL", "pg_isready -U secure_dojo"]
       interval: 5s
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgresql+asyncpg://aspm:aspm123@db/aspm
-      REDIS_URL: redis://redis:6379/0
-      SECRET_KEY: supersecretkeychangeinproduction
+      DATABASE_URL: postgresql+asyncpg://secure_dojo:secure_dojo_pass@db:5432/secure_coding_dojo
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "python scripts/load_challenges.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend:/app
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "5173:5173"
     depends_on:
       - backend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   postgres_data:
+

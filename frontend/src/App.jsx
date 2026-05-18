@@ -1,88 +1,242 @@
-import React, { useEffect, useState } from 'react';
-import FindingsTable from './components/FindingsTable';
-import MetricsChart from './components/MetricsChart';
-import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
+import React, { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+import EnhancedDashboard from './components/EnhancedDashboard';
+import EnhancedChallengeGallery from './components/EnhancedChallengeGallery';
+import AdvancedExerciseViewer from './components/AdvancedExerciseViewer';
+import './App.css';
 
 function App() {
-  const [findings, setFindings] = useState([]);
-  const [metrics, setMetrics] = useState({ total: 0, open: 0, in_progress: 0, resolved: 0, by_severity: {} });
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
+  
+  const [userId, setUserId] = useState(() => {
+    const stored = localStorage.getItem('secure_dojo_user_id');
+    if (stored) return stored;
+    const newId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('secure_dojo_user_id', newId);
+    return newId;
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [metricsRes, findingsRes] = await Promise.all([
-          axios.get('/api/metrics/dashboard'),
-          axios.get('/api/metrics/findings?limit=20')
-        ]);
-        setMetrics(metricsRes.data);
-        setFindings(findingsRes.data);
-      } catch (err) {
-        toast.error('Failed to load data');
-      }
-    };
-    fetchData();
-  }, []);
+  const handleNavigateToGallery = () => {
+    setCurrentView('gallery');
+  };
 
-  const handleStatusChange = async (findingId, status) => {
-    try {
-      const res = await axios.patch(`/api/metrics/findings/${findingId}/status`, { status });
-      setFindings(prev => prev.map(item => item.id === findingId ? res.data : item));
-      const metricsRes = await axios.get('/api/metrics/dashboard');
-      setMetrics(metricsRes.data);
-      toast.success('Status actualizado');
-    } catch (err) {
-      toast.error('No se pudo actualizar el estado');
-    }
+  const handleSelectChallenge = (exerciseId) => {
+    setSelectedExerciseId(exerciseId);
+    setCurrentView('exercise');
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+    setSelectedExerciseId(null);
+  };
+
+  const handleBackToGallery = () => {
+    setCurrentView('gallery');
+    setSelectedExerciseId(null);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="app">
       <Toaster position="top-right" />
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">🛡️ ASPM - Vulnerability Management</h1>
+      
+      {currentView === 'dashboard' && (
+        <EnhancedDashboard onNavigateToExercises={handleNavigateToGallery} />
+      )}
+      
+      {currentView === 'gallery' && (
+        <EnhancedChallengeGallery onSelectChallenge={handleSelectChallenge} />
+      )}
+      
+      {currentView === 'exercise' && selectedExerciseId && (
+        <AdvancedExerciseViewer 
+          exerciseId={selectedExerciseId} 
+          onBack={handleBackToGallery}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
+        const data = await response.json();
+        setUserProgress(data);
+      } catch (error) {
+        console.error('Error loading progress:', error);
+      }
+    };
+
+    loadProgress();
+  }, [userId]);
+
+  const handleSelectChallenge = async (challenge) => {
+    try {
+      // Cargar detalles completos del desafío
+      const response = await fetch(`http://localhost:8000/api/challenges/${challenge.id}`);
+      const fullChallenge = await response.json();
+      
+      setSelectedChallenge(fullChallenge);
+      
+      // Registrar que el usuario inició el desafío
+      await fetch('http://localhost:8000/api/challenges/progress/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: challenge.id, user_id: userId })
+      });
+      
+      setCurrentView('exercise');
+    } catch (error) {
+      console.error('Error loading challenge details:', error);
+      toast.error('Error cargando detalles del desafío');
+    }
+  };
+
+  const handleCompleteChallenge = async (data) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/challenges/progress/submit-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challenge_id: selectedChallenge.id,
+          user_id: userId,
+          answer: 'completed',
+          time_spent: data.timeSpent
+        })
+      });
+      
+      const result = await response.json();
+      
+      toast.success('¡Desafío completado! 🎉');
+      setCurrentView('dashboard');
+      setSelectedChallenge(null);
+      
+      // Reload progress
+      const progressResponse = await fetch(`http://localhost:8000/api/challenges/progress/${userId}`);
+      const progressData = await progressResponse.json();
+      setUserProgress(progressData);
+    } catch (error) {
+      console.error('Error completing challenge:', error);
+      toast.error('Error completando desafío');
+    }
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+    setSelectedChallenge(null);
+  };
+
+  return (
+    <div className="app-container">
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#1e293b',
+            color: '#e2e8f0',
+            border: '1px solid #334155',
+            borderRadius: '8px',
+            backdropFilter: 'blur(10px)',
+          },
+        }}
+      />
+      
+      {/* Header Navigation */}
+      {currentView !== 'exercise' && (
+        <header className="app-header">
+          <div className="header-content">
+            <div className="logo-section">
+              <span className="logo-icon">🛡️</span>
+              <div className="logo-text">
+                <h1>Secure Coding Dojo</h1>
+                <p>Plataforma Educativa Interactiva</p>
+              </div>
+            </div>
+            
+            <div className="header-stats">
+              <div className="stat">
+                <span className="stat-label">Desafíos Completados</span>
+                <span className="stat-value">{userProgress.completed_challenges || 0}</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Puntuación Total</span>
+                <span className="stat-value">{userProgress.total_score || 0}</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Progreso</span>
+                <span className="stat-value">{userProgress.completion_percentage || 0}%</span>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </header>
+      )}
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-gray-500">Total Findings</p>
-            <p className="text-2xl font-bold">{metrics.total}</p>
+      {/* Main Content */}
+      <main className="app-main">
+        {loading && (
+          <div className="loading-container">
+            <div className="loading-spinner">⚙️</div>
+            <p>Cargando desafíos educativos...</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-red-500">Open</p>
-            <p className="text-2xl font-bold">{metrics.open}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-yellow-500">In Progress</p>
-            <p className="text-2xl font-bold">{metrics.in_progress}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-green-500">Resolved</p>
-            <p className="text-2xl font-bold">{metrics.resolved}</p>
-          </div>
-        </div>
+        )}
 
-        {/* Chart and Table */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-1">
-            <MetricsChart data={metrics} />
-          </div>
-          <div className="lg:col-span-2">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-2">Latest Findings</h3>
-              <FindingsTable findings={findings} onStatusChange={handleStatusChange} />
-            </div>
-          </div>
-        </div>
+        {!loading && currentView === 'dashboard' && (
+          <DashboardEducativo 
+            challenges={challenges}
+            onSelectChallenge={handleSelectChallenge}
+            userProgress={userProgress}
+          />
+        )}
+
+        {!loading && currentView === 'gallery' && (
+          <ChallengeGallery 
+            challenges={challenges}
+            onSelectChallenge={handleSelectChallenge}
+          />
+        )}
+
+        {currentView === 'exercise' && selectedChallenge && (
+          <InteractiveExercise 
+            challenge={selectedChallenge}
+            onComplete={handleCompleteChallenge}
+            onBack={handleBackToDashboard}
+          />
+        )}
       </main>
+
+      {/* Footer */}
+      {currentView !== 'exercise' && (
+        <footer className="app-footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>Sobre Secure Coding Dojo</h3>
+              <p>Plataforma educativa de seguridad en la programación con ejercicios prácticos basados en vulnerabilidades reales.</p>
+            </div>
+            <div className="footer-section">
+              <h3>Contenido</h3>
+              <ul>
+                <li>6+ Desafíos de Seguridad</li>
+                <li>Explicaciones Detalladas</li>
+                <li>Código Vulnerable vs Seguro</li>
+                <li>Pistas Progresivas</li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h3>Recursos</h3>
+              <ul>
+                <li>OWASP Top 10</li>
+                <li>CWE/CVSS Scores</li>
+                <li>Mejores Prácticas</li>
+                <li>Referencias</li>
+              </ul>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>&copy; 2024 Secure Coding Dojo - Plataforma Educativa de Ciberseguridad</p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
