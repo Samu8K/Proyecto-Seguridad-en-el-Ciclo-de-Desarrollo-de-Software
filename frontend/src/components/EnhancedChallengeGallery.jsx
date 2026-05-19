@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, Target, Lock, AlertTriangle, TrendingUp, Award } from 'lucide-react';
+import API_URL from '../config';
 import './EnhancedChallengeGallery.css';
 
 const EnhancedChallengeGallery = ({ onSelectChallenge }) => {
@@ -14,8 +15,8 @@ const EnhancedChallengeGallery = ({ onSelectChallenge }) => {
     const loadData = async () => {
       try {
         const [exercisesRes, statsRes] = await Promise.all([
-          fetch('http://localhost:8000/api/exercises/all'),
-          fetch('http://localhost:8000/api/exercises/statistics')
+          fetch(`${API_URL}/api/exercises/all`),
+          fetch(`${API_URL}/api/exercises/statistics`)
         ]);
 
         const exercisesData = await exercisesRes.json();

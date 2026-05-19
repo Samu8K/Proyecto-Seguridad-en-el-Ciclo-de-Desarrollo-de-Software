@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Shield, AlertTriangle, CheckCircle, Book, Code, Target, Zap, Lock, Globe } from 'lucide-react';
+import API_URL from '../config';
 import './AdvancedExerciseViewer.css';
 
 const AdvancedExerciseViewer = ({ exerciseId, onBack }) => {
@@ -18,7 +19,7 @@ const AdvancedExerciseViewer = ({ exerciseId, onBack }) => {
   useEffect(() => {
     const loadExercise = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/exercises/exercise/${exerciseId}`);
+        const response = await fetch(`${API_URL}/api/exercises/exercise/${exerciseId}`);
         const data = await response.json();
         setExercise(data);
         setLoading(false);
@@ -42,7 +43,7 @@ const AdvancedExerciseViewer = ({ exerciseId, onBack }) => {
   const loadHints = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/exercises/exercise/${exerciseId}/hints?hints_used=${hintsUsed}`
+        `${API_URL}/api/exercises/exercise/${exerciseId}/hints?hints_used=${hintsUsed}`
       );
       const data = await response.json();
       setHints(data.hints);
@@ -60,7 +61,7 @@ const AdvancedExerciseViewer = ({ exerciseId, onBack }) => {
     setAttempts(prev => prev + 1);
     try {
       const response = await fetch(
-        `http://localhost:8000/api/exercises/exercise/${exerciseId}/test-attack`,
+        `${API_URL}/api/exercises/exercise/${exerciseId}/test-attack`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

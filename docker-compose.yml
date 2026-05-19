@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U secure_dojo"]
+      test: ["CMD-SHELL", "pg_isready -U secure_dojo -d secure_coding_dojo"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -28,8 +28,7 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c "python scripts/load_challenges.py &&
-             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000"
     volumes:
       - ./backend:/app
 
@@ -38,11 +37,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "3000:3000"
     depends_on:
       - backend
-    environment:
-      VITE_API_URL: http://localhost:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules

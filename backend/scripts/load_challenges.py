@@ -4,7 +4,9 @@ Script para cargar desafíos de seguridad iniciales en la base de datos
 
 import sys
 from datetime import datetime
-sys.path.insert(0, '/workspaces/Proyecto-Seguridad-en-el-Ciclo-de-Desarrollo-de-Software/backend')
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.db.session import SessionLocal
 from app.models.challenge import Challenge, Hint, DifficultyLevel, VulnerabilityType, AttackType

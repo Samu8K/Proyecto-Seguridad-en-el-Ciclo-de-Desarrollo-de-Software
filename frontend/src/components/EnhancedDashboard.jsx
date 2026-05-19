@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Zap, Target, Lock, AlertTriangle, Award, TrendingUp, Clock, Shield } from 'lucide-react';
+import { Zap, Target, Lock, AlertTriangle, Award, TrendingUp, Clock, Shield, ChevronRight } from 'lucide-react';
+import API_URL from '../config';
 import './EnhancedDashboard.css';
 
 const EnhancedDashboard = ({ onNavigateToExercises }) => {
@@ -10,7 +11,7 @@ const EnhancedDashboard = ({ onNavigateToExercises }) => {
   useEffect(() => {
     const loadStatistics = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/exercises/statistics');
+        const response = await fetch(`${API_URL}/api/exercises/statistics`);
         const data = await response.json();
         setStatistics(data);
         setLoading(false);

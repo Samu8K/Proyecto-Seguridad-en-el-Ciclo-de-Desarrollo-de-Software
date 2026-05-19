@@ -138,11 +138,13 @@ class Lesson(Base):
     key_concepts: Mapped[str] = mapped_column(Text)
     code_examples: Mapped[str] = mapped_column(Text)
     video_url: Mapped[str] = mapped_column(String(500))
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     
     order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relaciones
     user_progress = relationship("UserLessonProgress", backref="lesson", cascade="all, delete-orphan")
@@ -161,25 +163,8 @@ class UserLessonProgress(Base):
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     content: Mapped[str] = mapped_column(Text)
     level: Mapped[int] = mapped_column(Integer, default=1)  # 1, 2, 3... progresivo
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-class Lesson(Base):
-    __tablename__ = "lessons"
-
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    title: Mapped[str] = mapped_column(String(255), index=True)
-    description: Mapped[str] = mapped_column(Text)
-    content: Mapped[str] = mapped_column(Text)
-    order: Mapped[int] = mapped_column(Integer)
-    difficulty: Mapped[DifficultyLevel] = mapped_column(Enum(DifficultyLevel))
-    
-    # Multimedia
-    video_url: Mapped[str | None] = mapped_column(String(500))
-    image_url: Mapped[str | None] = mapped_column(String(500))
-    
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

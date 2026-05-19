@@ -2,7 +2,9 @@
 Script para cargar los 6 desafíos educativos de Secure Coding Dojo
 """
 import sys
-sys.path.insert(0, "/workspaces/Proyecto-Seguridad-en-el-Ciclo-de-Desarrollo-de-Software/backend")
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal

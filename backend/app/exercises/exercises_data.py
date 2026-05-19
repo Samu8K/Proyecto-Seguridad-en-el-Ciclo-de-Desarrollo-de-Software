@@ -798,10 +798,10 @@ def verify_password(password, hash):
             "CWE-287: https://cwe.mitre.org/data/definitions/287.html",
             "JWT Best Practices: https://tools.ietf.org/html/rfc8725"
         ]
-    }
-}
+    },
 
     # ==================== 4. INSECURE DESERIALIZATION ====================
+
     "4_insecure_deserialization": {
         "id": "4_insecure_deserialization",
         "title": "Deserialización Insegura en Caché de Usuario",
