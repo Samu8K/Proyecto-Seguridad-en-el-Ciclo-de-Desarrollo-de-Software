@@ -1,83 +1,147 @@
-# ⚡ Guía Rápida de Inicio - Secure Coding Dojo v2.0
+# ⚡ DevSecOps - Guía Rápida de Automatización
 
-## 🚀 Inicio en 5 Minutos
+## 🎯 Lo Esencial
 
-### Opción 1: Docker (Recomendado - La Más Rápida)
+**La automatización DevSecOps está completamente en GitHub Actions.**
 
-```bash
-# 1. Asegúrate de tener Docker instalado
-docker --version
-docker-compose --version
-
-# 2. Clona o descarga el proyecto
-cd tu-proyecto
-
-# 3. Levanta los contenedores
-docker-compose up -d
-
-# 4. Espera 30 segundos a que se inicialice
-
-# 5. Accede a:
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
-# Docs API: http://localhost:8000/docs
-
-# 6. ¡Comienza a usar!
-```
-
-### Opción 2: Instalación Local Manual
-
-#### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- npm
-
-#### Backend
+No necesitas scripts. Solo haz push a `main` y todo se ejecuta automáticamente.
 
 ```bash
-# Terminal 1: Backend
+git push origin main
 
-cd backend
-
-# Crear entorno virtual
-python -m venv venv
-
-# Activar
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Ejecutar servidor
-uvicorn app.main:app --reload --port 8000
-
-# Listo en: http://localhost:8000
+✅ Workflows ejecutan automáticamente
+✅ Ve a GitHub Actions para monitorear
+✅ Descarga reportes en Artifacts
 ```
 
-#### Frontend
+---
 
+## 🚀 Cómo Funciona
+
+### 1. Haces Push a Main
 ```bash
-# Terminal 2: Frontend
-
-cd frontend
-
-# Instalar dependencias
-npm install
-
-# Ejecutar desarrollo
-npm run dev
-
-# Listo en: http://localhost:3000
+git add .
+git commit -m "tu cambio"
+git push origin main
 ```
 
-## 🎯 Uso Básico
+### 2. GitHub Detecta Cambios
+GitHub Actions se activa automáticamente
 
-### Como Estudiante
+### 3. Corren 2 Workflows en Paralelo
+```
+├─ DevSecOps Pipeline (3-5 min)
+│  ├─ Semgrep Analysis
+│  ├─ pip-audit (Python)
+│  ├─ npm audit (Node.js)
+│  └─ Build Docker Images
+│
+└─ Security Scan (2-4 min)
+   ├─ Code Analysis
+   ├─ Dependency Check
+   └─ Generate Report
+```
 
-1. **Abre el navegador**: http://localhost:3000
+### 4. Ver Resultados
+```
+GitHub → Actions Tab → [Workflow Name]
+```
+
+---
+
+## 📊 Monitorear
+
+### En Tiempo Real
+```
+GitHub Actions Tab
+├─ 🟡 In Progress
+├─ ✅ Success
+├─ ⚠️  With Warnings
+└─ ❌ Failed
+```
+
+### Descargar Reportes
+```
+Actions → [Run] → Artifacts → devsecops-reports.zip
+```
+
+Contiene:
+```
+├─ backend/semgrep-results.json
+├─ backend/pip-audit.json
+└─ npm-audit.json
+```
+
+---
+
+## ⚙️ Configurar ASPM (Opcional)
+
+Si tienes plataforma ASPM:
+
+```
+GitHub Settings
+→ Secrets and variables
+→ Actions
+→ New Secret
+
+ASPM_API_URL = https://tu-aspm.com/api
+ASPM_API_KEY = tu-clave-aqui
+```
+
+**Listo.** Los resultados se envían automáticamente.
+
+---
+
+## 🔄 Triggers Automáticos
+
+| Cuándo | Workflows |
+|--------|-----------|
+| Push a main | Ambos ✅ |
+| Pull Request a main | Ambos ✅ |
+| Domingo 2 AM UTC | Security ✅ |
+| Domingo 3 AM UTC | DevSecOps ✅ |
+
+---
+
+## 📈 Entender Resultados
+
+### Semgrep = Análisis de Código
+```
+Encuentra: SQL Injection, XSS, etc.
+Severidad: ERROR, WARNING
+```
+
+### pip-audit = Dependencias Python
+```
+Encuentra: CVEs conocidos
+Acción: Actualizar versión
+```
+
+### npm audit = Dependencias Node
+```
+Encuentra: Vulnerabilidades en packages
+Acción: npm audit fix
+```
+
+---
+
+## ✅ Checklist
+
+- [ ] Código está en main
+- [ ] Viste workflows en Actions tab
+- [ ] Descargaste reportes
+- [ ] Entiendes los resultados
+- [ ] (Opcional) Configuraste ASPM
+
+---
+
+## 📚 Documentación Completa
+
+**[WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md)** - Guía detallada
+
+---
+
+¡Eso es todo! 🎉 Todo es automático desde GitHub Actions.
 2. **Verás el Dashboard** con:
    - Estadísticas de ejercicios
    - Ruta de aprendizaje

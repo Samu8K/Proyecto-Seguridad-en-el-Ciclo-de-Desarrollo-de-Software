@@ -2,6 +2,25 @@
 
 Una plataforma educativa moderna y completamente interactiva para aprender ciberseguridad y seguridad en la codificación mediante ejercicios prácticos, desafíos y lecciones basadas en vulnerabilidades reales del mundo.
 
+## 🔐 Automatización DevSecOps ⚡
+
+**IMPORTANTE:** La automatización de seguridad está completamente integrada en GitHub Actions.
+
+```bash
+# Solo necesitas hacer push
+git push origin main
+
+✅ Los workflows se ejecutan automáticamente
+✅ Semgrep analysis
+✅ Dependency checks (pip-audit + npm audit)
+✅ Docker builds
+✅ Reportes en Artifacts
+```
+
+**Documentación:** [WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md)
+
+---
+
 ## 🎯 Características Principales
 
 ### 📚 Sistema de Desafíos Educativos

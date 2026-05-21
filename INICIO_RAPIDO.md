@@ -1,103 +1,183 @@
 # 🚀 Guía de Inicio Rápido - Secure Coding Dojo
 
-## Opción 1: Con Docker Compose (Recomendado - ⭐ MÁS FÁCIL)
+## ⚡ Automatización DevSecOps (Automático)
 
-### Pasos:
+**NO necesitas hacer nada.** Todo se ejecuta automáticamente en GitHub Actions:
 
-1. **Abre una terminal en la carpeta del proyecto**
 ```bash
-cd /workspaces/Proyecto-Seguridad-en-el-Ciclo-de-Desarrollo-de-Software
+# Solo haz push normal
+git add .
+git commit -m "tu cambio"
+git push origin main
+
+✅ Los workflows se ejecutan automáticamente
+✅ Ve a GitHub → Actions para ver progreso
+✅ Descarga reportes en Artifacts
 ```
 
-2. **Copia el archivo de ejemplo de configuración**
-```bash
-cp .env.example .env
-```
+**Documentación completa:** Ver [WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md)
 
-3. **Levanta los servicios con Docker Compose**
-```bash
-docker-compose up --build
-```
+---
 
-4. **Espera a que se complete la inicialización**
-   - Verás mensajes de carga de ejercicios
-   - El backend iniciará en puerto 8000
-   - El frontend iniciará en puerto 5173
+## 🌐 Desarrollo Local (Opcional)
 
-5. **Accede a la aplicación**
-   - 🌐 **Frontend**: http://localhost:5173
-   - 📚 **Backend API Docs**: http://localhost:8000/docs
-   - 📊 **API Health**: http://localhost:8000/health
-
-## Opción 2: Instalación Manual (Desarrollo)
+Si quieres desarrollar sin Docker:
 
 ### Backend Setup
 
 ```bash
-# 1. Navega al directorio del backend
 cd backend
 
-# 2. Crear entorno virtual Python
+# Crear entorno virtual
 python3 -m venv venv
+source venv/bin/activate
 
-# 3. Activar entorno virtual
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-
-# 4. Instalar dependencias
+# Instalar dependencias
 pip install -r requirements.txt
 
-# 5. Cargar ejercicios iniciales
-python scripts/load_challenges.py
-
-# 6. Ejecutar servidor
+# Ejecutar servidor
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Frontend Setup (en otra terminal)
+### Frontend Setup (otra terminal)
 
 ```bash
-# 1. Navega al directorio del frontend
 cd frontend
 
-# 2. Instalar dependencias
+# Instalar dependencias
 npm install
 
-# 3. Ejecutar servidor de desarrollo
+# Ejecutar servidor de desarrollo
 npm run dev
-
-# 4. Accede a http://localhost:5173
 ```
+
+**Accede a:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+---
+
+## 🐳 Con Docker (Recomendado)
+
+```bash
+# Opción 1: docker-compose
+docker-compose up --build
+
+# Opción 2: docker compose (plugin moderno)
+docker compose up --build
+```
+
+**Accede a:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+---
 
 ## 🎮 Primer Uso
 
-1. **Abre http://localhost:5173 en tu navegador**
-2. **Verás el Dashboard principal** con:
+1. **Abre http://localhost:3000 en tu navegador**
+2. **Verás el Dashboard** con:
    - 📊 Estadísticas globales
-   - 🌱 Desafíos por nivel de dificultad
+   - 🌱 Desafíos por dificultad
    - 📚 Lecciones disponibles
 
 3. **Selecciona un desafío** (comienza con Principiante)
 4. **Lee las explicaciones**:
-   - 🔍 Comprende la vulnerabilidad
-   - ⚔️ Aprende cómo funciona el ataque
-   - 💻 Compara el código vulnerable vs seguro
-   - 🛡️ Estudia las contramedidas
+   - 🔍 Vulnerabilidad
+   - ⚔️ Ataque real
+   - 💻 Código vulnerable vs seguro
+   - 🛡️ Contramedidas
 
-5. **Intenta resolver** el desafío:
-   - Escribe tu respuesta
-   - Solicita pistas si es necesario
-   - Envía tu respuesta
+5. **Resuelve el desafío**:
+   - Escribe respuesta
+   - Solicita pistas si necesitas
+   - Envía respuesta
 
 6. **Recibe feedback** y continúa aprendiendo
 
-## 🔌 Endpoints Rápidos
+---
+
+## 🔌 Endpoints Útiles
 
 ```bash
 # Ver todos los desafíos
-curl http://localhost:8000/api/challenges/
+curl http://localhost:8000/api/exercises/all
 
 # Ver documentación interactiva
 open http://localhost:8000/docs
+
+# Health check
+curl http://localhost:8000/health
+```
+
+---
+
+## 📝 Configuración (Opcional)
+
+### Secrets para ASPM
+
+Si tienes plataforma ASPM (Snyk, Aqua, etc.):
+
+```
+GitHub Settings → Secrets → Actions
+
+ASPM_API_URL=https://tu-aspm.com/api
+ASPM_API_KEY=tu-api-key
+```
+
+Los resultados se enviarán automáticamente.
+
+---
+
+## 📚 Documentación Completa
+
+- **[WORKFLOW_GUIDE.md](WORKFLOW_GUIDE.md)** - Cómo funciona la automatización
+- **[WORKFLOW_FIXES.md](WORKFLOW_FIXES.md)** - Qué se corrigió
+- **[DEVSECOPS_FIXES.md](DEVSECOPS_FIXES.md)** - Correcciones generales
+- **[ARQUITECTURA_NUEVA.md](ARQUITECTURA_NUEVA.md)** - Arquitectura del proyecto
+- **[DESAFIOS.md](DESAFIOS.md)** - Desafíos disponibles
+
+---
+
+## 🆘 Problemas Comunes
+
+### No puedo ver Frontend en http://localhost:3000
+
+```
+- Verifica que npm run dev esté ejecutándose
+- Verifica que no hay otro proceso en puerto 3000
+- Revisa los logs en la terminal de frontend
+```
+
+### Backend no responde
+
+```
+- Verifica que uvicorn esté corriendo
+- Verifica http://localhost:8000/health
+- Revisa los logs en la terminal de backend
+```
+
+### Docker no funciona
+
+```
+- Verifica que Docker está instalado: docker --version
+- Verifica que Docker Daemon esté corriendo
+- Intenta: docker-compose up --build
+```
+
+### Workflows no se ejecutan en GitHub
+
+```
+- Verifica que los cambios están en la rama main
+- Ve a Actions tab y espera 1-2 minutos
+- Revisa si hay `.github/workflows/*.yml`
+```
+
+---
+
+¡Listo! 🎉 Ahora puedes empezar a usar Secure Coding Dojo
 
 # Verificar salud del servidor
 curl http://localhost:8000/health
